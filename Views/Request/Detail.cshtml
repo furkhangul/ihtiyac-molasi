@@ -1,0 +1,215 @@
+@model IhtiyacMolasi.ViewModels.RequestDetailViewModel
+@using IhtiyacMolasi.Models
+@{
+    ViewData["Title"] = Model.Request.Title;
+    var req = Model.Request;
+}
+
+<section class="detail-page">
+    <div class="detail-container">
+
+        <!-- Geri -->
+        <a asp-controller="Home" asp-action="Index" class="back-link">
+            <i class="bi bi-arrow-left"></i> Tüm Talepler
+        </a>
+
+        <!-- ── ANA KART ─────────────────────────────────────── -->
+        <div class="detail-card">
+            <!-- Üst şerit -->
+            <div class="detail-top-bar" style="--bar-color:@req.Category!.ColorHex">
+                <span class="det-cat-badge" style="background:@req.Category.ColorHex">
+                    <i class="bi @req.Category.Icon"></i> @req.Category.Name
+                </span>
+                <div class="det-badges">
+                    @if (req.UrgencyLevel == UrgencyLevel.ÇokAcil)
+                    { <span class="urg-badge urg-critical"><i class="bi bi-exclamation-circle-fill"></i> Çok Acil</span> }
+                    else if (req.UrgencyLevel == UrgencyLevel.Acil)
+                    { <span class="urg-badge urg-high"><i class="bi bi-lightning-fill"></i> Acil</span> }
+
+                    <span class="status-badge status-@req.Status.ToString().ToLower()">
+                        @req.Status
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-body">
+                <h1 class="detail-title">@req.Title</h1>
+                <p class="detail-desc">@req.Description</p>
+
+                <!-- Meta grid -->
+                <div class="detail-meta-grid">
+                    <div class="det-meta-item">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <div>
+                            <span class="dmi-label">Mahalle</span>
+                            <span class="dmi-val">@req.Neighborhood!.Name, @req.Neighborhood.District</span>
+                        </div>
+                    </div>
+                    <div class="det-meta-item">
+                        <i class="bi bi-person-fill"></i>
+                        <div>
+                            <span class="dmi-label">Talep Eden</span>
+                            <span class="dmi-val">@(req.IsAnonymous ? "Anonim" : req.RequesterAlias)</span>
+                        </div>
+                    </div>
+                    <div class="det-meta-item">
+                        <i class="bi bi-clock-fill"></i>
+                        <div>
+                            <span class="dmi-label">Kalan Süre</span>
+                            <span class="dmi-val @(req.IsExpired ? "text-danger" : "")">@req.TimeLeftDisplay</span>
+                        </div>
+                    </div>
+                    <div class="det-meta-item">
+                        <i class="bi bi-eye-fill"></i>
+                        <div>
+                            <span class="dmi-label">Görüntülenme</span>
+                            <span class="dmi-val">@req.ViewCount kez</span>
+                        </div>
+                    </div>
+                    <div class="det-meta-item">
+                        <i class="bi bi-calendar3"></i>
+                        <div>
+                            <span class="dmi-label">Oluşturuldu</span>
+                            <span class="dmi-val">@req.CreatedAt.ToString("dd MMM yyyy, HH:mm")</span>
+                        </div>
+                    </div>
+                    <div class="det-meta-item">
+                        <i class="bi bi-people-fill"></i>
+                        <div>
+                            <span class="dmi-label">Gönüllüler</span>
+                            <span class="dmi-val">@Model.Assignments.Count kişi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── EYLEM BUTONLARI ──────────────────────── -->
+            <div class="detail-actions">
+                @if (req.Status == RequestStatus.Açık && !req.IsExpired)
+                {
+                    <a asp-controller="Volunteer" asp-action="TakeRequest" asp-route-id="@req.Id"
+                       class="btn-volunteer-big">
+                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                        Yapabilirim! Bu Talebi Üstleniyorum
+                    </a>
+                }
+                else if (req.Status == RequestStatus.Üstlenildi)
+                {
+                    @foreach (var a in Model.Assignments.Where(x => x.Status == AssignmentStatus.Aktif))
+                    {
+                        <form asp-controller="Volunteer" asp-action="Complete" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="assignmentId" value="@a.Id" />
+                            <button type="submit" class="btn-complete">
+                                <i class="bi bi-check-circle-fill"></i> Tamamlandı Olarak İşaretle
+                            </button>
+                        </form>
+                    }
+                }
+                else if (req.Status == RequestStatus.Tamamlandı)
+                {
+                    <div class="completed-banner">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Bu yardım tamamlandı! Gönüllüye teşekkürler 🎉
+                    </div>
+                }
+
+                <!-- İptal + Rapor -->
+                <div class="secondary-actions">
+                    @if (req.Status == RequestStatus.Açık)
+                    {
+                        <form asp-controller="Request" asp-action="Cancel" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@req.Id" />
+                            <button type="submit" class="btn-cancel-sm"
+                                    onclick="return confirm('Talebi iptal etmek istediğinize emin misiniz?')">
+                                <i class="bi bi-x-circle"></i> İptal Et
+                            </button>
+                        </form>
+                    }
+
+                    <button class="btn-report-sm" onclick="document.getElementById('reportPanel').classList.toggle('open')">
+                        <i class="bi bi-flag"></i> Şikayet Et
+                    </button>
+                </div>
+
+                <!-- Rapor paneli -->
+                <div id="reportPanel" class="report-panel">
+                    <form asp-controller="Request" asp-action="Report" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@req.Id" />
+                        <textarea name="reason" placeholder="Şikayet nedeninizi yazın…" rows="3" class="field-textarea small"></textarea>
+                        <input name="alias" class="field-input small" placeholder="Rumuzunuz (opsiyonel)" />
+                        <button type="submit" class="btn-report-send">Gönder</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── GÖNÜLLÜLER ───────────────────────────────────── -->
+        @if (Model.Assignments.Any())
+        {
+            <div class="side-section">
+                <h2 class="side-title"><i class="bi bi-people-fill"></i> Gönüllüler</h2>
+                <div class="volunteer-list">
+                    @foreach (var v in Model.Assignments)
+                    {
+                        <div class="vol-item">
+                            <div class="vol-avatar">@v.VolunteerAlias[0].ToString().ToUpper()</div>
+                            <div>
+                                <span class="vol-name">@v.VolunteerAlias</span>
+                                @if (!string.IsNullOrEmpty(v.Note))
+                                { <p class="vol-note">"@v.Note"</p> }
+                                <span class="vol-time">@v.AssignedAt.ToString("dd MMM, HH:mm")</span>
+                            </div>
+                            <span class="vol-status-badge @v.Status.ToString().ToLower()">@v.Status</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- ── YORUMLAR ──────────────────────────────────────── -->
+        <div class="side-section">
+            <h2 class="side-title"><i class="bi bi-chat-dots-fill"></i> Yorumlar (@Model.Comments.Count)</h2>
+
+            @if (Model.Comments.Any())
+            {
+                <div class="comments-list">
+                    @foreach (var c in Model.Comments)
+                    {
+                        <div class="comment-item">
+                            <div class="comment-avatar">@c.AuthorAlias[0].ToString().ToUpper()</div>
+                            <div class="comment-body">
+                                <div class="comment-meta">
+                                    <span class="comment-author">@c.AuthorAlias</span>
+                                    <span class="comment-time">@c.CreatedAt.ToString("dd MMM, HH:mm")</span>
+                                </div>
+                                <p class="comment-text">@c.Content</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="no-comments">Henüz yorum yok. İlk yorumu sen yaz!</p>
+            }
+
+            <!-- Yorum ekle -->
+            <form asp-controller="Request" asp-action="AddComment" method="post" class="comment-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="requestId" value="@req.Id" />
+                <input name="alias" class="field-input small" placeholder="Adınız / Rumuzunuz (opsiyonel)" />
+                <div class="comment-input-row">
+                    <textarea name="content" class="field-textarea small" rows="2"
+                              placeholder="Yorum yaz…" maxlength="500" required></textarea>
+                    <button type="submit" class="btn-comment-send">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</section>

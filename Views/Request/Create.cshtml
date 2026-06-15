@@ -1,0 +1,187 @@
+@model IhtiyacMolasi.ViewModels.CreateRequestViewModel
+@{
+    ViewData["Title"] = "Yardım İste";
+}
+
+<section class="form-page">
+    <div class="form-container">
+
+        <!-- Başlık -->
+        <div class="form-header">
+            <a asp-controller="Home" asp-action="Index" class="back-link">
+                <i class="bi bi-arrow-left"></i> Geri
+            </a>
+            <div class="form-title-block">
+                <span class="form-eyebrow">Anonim · Kayıtsız · Hızlı</span>
+                <h1 class="form-title">Yardım Talebi Oluştur</h1>
+                <p class="form-sub">Yakınındaki gönüllüler talebini görecek ve "Yapabilirim" diyecek.</p>
+            </div>
+        </div>
+
+        <form asp-action="Create" method="post" class="modern-form" id="createForm" novalidate>
+            @Html.AntiForgeryToken()
+
+            <!-- BÖLÜM 1: Ne yardıma ihtiyacın var? -->
+            <div class="form-section">
+                <h2 class="section-label"><span>01</span> Ne yardıma ihtiyacın var?</h2>
+
+                <div class="field-group">
+                    <label asp-for="CategoryId" class="field-label">Kategori *</label>
+                    <div class="category-grid">
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <label class="cat-option" style="--cat-c:@cat.ColorHex">
+                                <input type="radio" asp-for="CategoryId" value="@cat.Id" />
+                                <span class="cat-opt-inner">
+                                    <i class="bi @cat.Icon"></i>
+                                    <span>@cat.Name</span>
+                                </span>
+                            </label>
+                        }
+                    </div>
+                    <span asp-validation-for="CategoryId" class="field-error"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Title" class="field-label">Kısa Başlık *</label>
+                    <input asp-for="Title" class="field-input"
+                           placeholder="Örn: Eczaneden ilaç alınması lazım"
+                           maxlength="200" />
+                    <span asp-validation-for="Title" class="field-error"></span>
+                    <span class="char-count" id="titleCount">0 / 200</span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Description" class="field-label">Detay Açıklama *</label>
+                    <textarea asp-for="Description" class="field-textarea" rows="4"
+                              placeholder="Ne gerekiyor, nerede, ne zaman? Ne kadar sürer? Karşılığında ne sunacaksın (opsiyonel)?"
+                              maxlength="1000"></textarea>
+                    <span asp-validation-for="Description" class="field-error"></span>
+                    <span class="char-count" id="descCount">0 / 1000</span>
+                </div>
+            </div>
+
+            <!-- BÖLÜM 2: Konum & Aciliyet -->
+            <div class="form-section">
+                <h2 class="section-label"><span>02</span> Konum & Aciliyet</h2>
+
+                <div class="field-row-2">
+                    <div class="field-group">
+                        <label asp-for="NeighborhoodId" class="field-label">Mahalle *</label>
+                        <select asp-for="NeighborhoodId" class="field-select">
+                            <option value="">Mahallenizi seçin…</option>
+                            @foreach (var n in Model.Neighborhoods)
+                            {
+                                <option value="@n.Id">@n.Name — @n.District</option>
+                            }
+                        </select>
+                        <span asp-validation-for="NeighborhoodId" class="field-error"></span>
+                    </div>
+
+                    <div class="field-group">
+                        <label asp-for="UrgencyLevel" class="field-label">Aciliyet *</label>
+                        <div class="urgency-toggle">
+                            <label class="urg-opt">
+                                <input type="radio" asp-for="UrgencyLevel" value="1" checked />
+                                <span class="urg-inner urg-normal">
+                                    <i class="bi bi-circle"></i> Normal
+                                </span>
+                            </label>
+                            <label class="urg-opt">
+                                <input type="radio" asp-for="UrgencyLevel" value="2" />
+                                <span class="urg-inner urg-high">
+                                    <i class="bi bi-lightning-fill"></i> Acil
+                                </span>
+                            </label>
+                            <label class="urg-opt">
+                                <input type="radio" asp-for="UrgencyLevel" value="3" />
+                                <span class="urg-inner urg-critical">
+                                    <i class="bi bi-exclamation-circle-fill"></i> Çok Acil
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="ExpiresInHours" class="field-label">
+                        Ne kadar süre geçerli? <span id="expireLabel" class="expire-label">2 saat</span>
+                    </label>
+                    <input type="range" asp-for="ExpiresInHours" min="1" max="24" step="1"
+                           class="field-range" id="expiryRange" />
+                    <div class="range-marks">
+                        <span>1s</span><span>6s</span><span>12s</span><span>24s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BÖLÜM 3: Kimlik -->
+            <div class="form-section">
+                <h2 class="section-label"><span>03</span> Kimliğin (opsiyonel)</h2>
+
+                <div class="field-group">
+                    <label asp-for="RequesterAlias" class="field-label">Ad / Rumuz</label>
+                    <input asp-for="RequesterAlias" class="field-input"
+                           placeholder="Örn: HülyaH. veya boş bırak (Anonim olur)" />
+                    <span asp-validation-for="RequesterAlias" class="field-error"></span>
+                </div>
+
+                <label class="anon-toggle">
+                    <input type="checkbox" asp-for="IsAnonymous" id="anonCheck" />
+                    <span class="anon-slider"></span>
+                    <span class="anon-text">Anonim yayınla (adın gizlensin)</span>
+                </label>
+            </div>
+
+            <!-- Gönder -->
+            <div class="form-submit-row">
+                <p class="submit-note">
+                    <i class="bi bi-shield-check"></i>
+                    Kişisel veri saklamıyoruz. Talep süre bitince otomatik silinir.
+                </p>
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <span class="btn-text"><i class="bi bi-send-fill"></i> Talebi Yayınla</span>
+                    <span class="btn-loading" style="display:none">
+                        <i class="bi bi-arrow-repeat spin"></i> Gönderiliyor…
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+// Karakter sayaçları
+function charCount(inputId, countId, max) {
+    const el = document.getElementById(inputId) || document.querySelector(`[name="${inputId}"]`);
+    const cnt = document.getElementById(countId);
+    if (!el || !cnt) return;
+    const update = () => {
+        const len = el.value.length;
+        cnt.textContent = `${len} / ${max}`;
+        cnt.style.color = len > max * 0.9 ? '#ef4444' : '';
+    };
+    el.addEventListener('input', update);
+    update();
+}
+charCount('Title', 'titleCount', 200);
+charCount('Description', 'descCount', 1000);
+
+// Süre range label
+const range = document.getElementById('expiryRange');
+const label = document.getElementById('expireLabel');
+range.addEventListener('input', () => {
+    const v = parseInt(range.value);
+    label.textContent = v === 1 ? '1 saat' : `${v} saat`;
+});
+
+// Submit loading state
+document.getElementById('createForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.querySelector('.btn-text').style.display = 'none';
+    btn.querySelector('.btn-loading').style.display = 'inline-flex';
+    btn.disabled = true;
+});
+</script>
+}

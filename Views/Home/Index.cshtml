@@ -1,0 +1,274 @@
+@model IhtiyacMolasi.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Anlık Talepler";
+}
+
+<section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+        <div class="hero-pill">
+            <span class="pulse-dot"></span>
+            <span id="liveCount">@Model.ActiveRequests.Count</span> aktif talep
+        </div>
+
+        <h1 class="hero-title">
+            Komşuna<br />
+            <span class="gradient-text">5 dakikanda</span><br />
+            yardım et.
+        </h1>
+
+        <p class="hero-sub">
+            Anonim, kayıtsız, hızlı. Yakınındaki küçük bir yardım büyük fark yaratır.
+        </p>
+
+        <div class="hero-cta-row">
+            <a asp-controller="Request" asp-action="Create" class="btn-hero-primary">
+                <i class="bi bi-plus-circle-fill"></i> Yardım İste
+            </a>
+            <a href="#talepler" class="btn-hero-secondary">
+                <i class="bi bi-arrow-down-circle"></i> Talepleri Gör
+            </a>
+        </div>
+    </div>
+
+    <div class="hero-stats">
+        <div class="stat-card">
+            <span class="stat-num" data-target="@Model.TotalRequests">0</span>
+            <span class="stat-label">Toplam Talep</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-num" data-target="@Model.TotalVolunteers">0</span>
+            <span class="stat-label">Gönüllü</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-num" data-target="@Model.TotalCompleted">0</span>
+            <span class="stat-label">Çözüldü</span>
+        </div>
+    </div>
+</section>
+
+<section class="category-strip" id="talepler">
+    <div class="container">
+        <div class="chip-scroll">
+            <a href="@Url.Action("Index", "Home")"
+               class="chip @(Model.FilterCategoryId == null ? "chip-active" : "")">
+                <i class="bi bi-grid-fill"></i> Tümü
+            </a>
+
+            @foreach (var cat in Model.Categories)
+            {
+                <a href="@Url.Action("Index", "Home", new { categoryId = cat.Id, neighborhoodId = Model.FilterNeighborhoodId })"
+                   class="chip @(Model.FilterCategoryId == cat.Id ? "chip-active" : "")"
+                   style="--chip-color:@cat.ColorHex">
+                    <i class="bi @cat.Icon"></i> @cat.Name
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="filter-bar">
+    <div class="container">
+        <form method="get" asp-action="Index" asp-controller="Home" class="filter-form" id="filterForm">
+
+            <input type="hidden" name="categoryId" value="@Model.FilterCategoryId" />
+
+            <div class="filter-search">
+                <i class="bi bi-search"></i>
+                <input type="text" name="q" value="@Model.SearchQuery" placeholder="Talep ara..." class="filter-input" />
+            </div>
+
+            <select name="neighborhoodId" class="filter-select" onchange="this.form.submit()">
+                <option value="">Tüm Mahalleler</option>
+                @foreach (var n in Model.Neighborhoods)
+                {
+                    if (Model.FilterNeighborhoodId == n.Id)
+                    {
+                        <option value="@n.Id" selected>@n.Name, @n.District</option>
+                    }
+                    else
+                    {
+                        <option value="@n.Id">@n.Name, @n.District</option>
+                    }
+                }
+            </select>
+
+            <select name="urgency" class="filter-select" onchange="this.form.submit()">
+                <option value="">Tüm Aciliyetler</option>
+
+                @if (Model.FilterUrgency == "Normal")
+                {
+                    <option value="Normal" selected>Normal</option>
+                }
+                else
+                {
+                    <option value="Normal">Normal</option>
+                }
+
+                @if (Model.FilterUrgency == "Acil")
+                {
+                    <option value="Acil" selected>⚡ Acil</option>
+                }
+                else
+                {
+                    <option value="Acil">⚡ Acil</option>
+                }
+
+                @if (Model.FilterUrgency == "ÇokAcil")
+                {
+                    <option value="ÇokAcil" selected>🔴 Çok Acil</option>
+                }
+                else
+                {
+                    <option value="ÇokAcil">🔴 Çok Acil</option>
+                }
+            </select>
+
+            <button type="submit" class="btn-filter">
+                <i class="bi bi-funnel"></i> Filtrele
+            </button>
+
+        </form>
+    </div>
+</section>
+
+<section class="requests-section">
+    <div class="container">
+
+        @if (!Model.ActiveRequests.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+                <h3>Şu an aktif talep yok</h3>
+                <p>Bu filtreye uyan talep bulunamadı. İlk yardım talebini sen oluştur!</p>
+                <a asp-controller="Request" asp-action="Create" class="btn-hero-primary">
+                    <i class="bi bi-plus-circle-fill"></i> Talep Oluştur
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="requests-grid" id="requestsGrid">
+
+                @foreach (var req in Model.ActiveRequests)
+                {
+                    <a asp-controller="Request"
+                       asp-action="Detail"
+                       asp-route-id="@req.Id"
+                       class="request-card @(req.UrgencyLevel == IhtiyacMolasi.Models.UrgencyLevel.ÇokAcil ? "card-critical" : req.UrgencyLevel == IhtiyacMolasi.Models.UrgencyLevel.Acil ? "card-urgent" : "")">
+
+                        <div class="card-header-row">
+                            <span class="cat-badge" style="--cat-color:@req.Category!.ColorHex">
+                                <i class="bi @req.Category.Icon"></i>
+                                @req.Category.Name
+                            </span>
+
+                            <span class="card-time">
+                                <i class="bi bi-clock"></i> @req.TimeLeftDisplay
+                            </span>
+                        </div>
+
+                        <h3 class="card-title">@req.Title</h3>
+
+                        <p class="card-desc">
+                            @(req.Description != null && req.Description.Length > 110
+                                ? req.Description.Substring(0, 110) + "..."
+                                : req.Description)
+                        </p>
+
+                        <div class="card-footer-row">
+                            <div class="card-meta">
+                                <span class="meta-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    @req.Neighborhood!.Name
+                                </span>
+
+                                <span class="meta-item">
+                                    <i class="bi bi-person"></i>
+                                    @(req.IsAnonymous ? "Anonim" : req.RequesterAlias)
+                                </span>
+                            </div>
+
+                            <div class="card-badges">
+                                @if (req.UrgencyLevel == IhtiyacMolasi.Models.UrgencyLevel.ÇokAcil)
+                                {
+                                    <span class="urg-badge urg-critical">
+                                        <i class="bi bi-exclamation-circle-fill"></i> Çok Acil
+                                    </span>
+                                }
+                                else if (req.UrgencyLevel == IhtiyacMolasi.Models.UrgencyLevel.Acil)
+                                {
+                                    <span class="urg-badge urg-high">
+                                        <i class="bi bi-lightning-fill"></i> Acil
+                                    </span>
+                                }
+
+                                @if (req.Status == IhtiyacMolasi.Models.RequestStatus.Üstlenildi)
+                                {
+                                    <span class="urg-badge urg-assigned">
+                                        <i class="bi bi-person-check-fill"></i> Üstlenildi
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        @if (req.Status == IhtiyacMolasi.Models.RequestStatus.Açık)
+                        {
+                            <div class="card-volunteer-cta">
+                                <span class="vol-btn">
+                                    <i class="bi bi-hand-thumbs-up"></i> Yapabilirim
+                                </span>
+                            </div>
+                        }
+
+                    </a>
+                }
+
+            </div>
+        }
+
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.stat-num').forEach(el => {
+            const target = parseInt(el.dataset.target) || 0;
+            let start = 0;
+            const step = Math.ceil(target / 40);
+
+            const timer = setInterval(() => {
+                start = Math.min(start + step, target);
+                el.textContent = start.toLocaleString('tr-TR');
+                if (start >= target) clearInterval(timer);
+            }, 40);
+        });
+
+        function refreshLiveCount() {
+            fetch('/api/requests/live')
+                .then(r => r.json())
+                .then(data => {
+                    const el = document.getElementById('liveCount');
+                    if (el) el.textContent = data.length;
+                })
+                .catch(() => {});
+        }
+
+        setInterval(refreshLiveCount, 30000);
+
+        document.querySelectorAll('.request-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+                const y = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
+                card.style.transform = `perspective(800px) rotateX(${-y}deg) rotateY(${x}deg) translateY(-4px)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+    </script>
+}

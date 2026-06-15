@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="İhtiyaç Molası – Anlık Mahalle Yardım Ağı. Yakınındaki birine 5 dakikanda yardım et." />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " · " : "")İhtiyaç Molası</title>
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Circle-icons-rocket.svg/960px-Circle-icons-rocket.svg.png">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════════════════ -->
+<nav class="navbar" id="mainNav">
+    <div class="nav-container">
+        <a class="nav-brand" asp-controller="Home" asp-action="Index">
+            <span class="brand-icon"><i class="bi bi-hand-thumbs-up-fill"></i></span>
+            <span class="brand-text">İhtiyaç<strong>Molası</strong></span>
+        </a>
+
+        <div class="nav-center" id="navCenter">
+            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-grid-1x2"></i> Talepler
+            </a>
+            <a class="nav-link" asp-controller="Home" asp-action="About">
+                <i class="bi bi-info-circle"></i> Hakkında
+            </a>
+        </div>
+
+        <div class="nav-actions">
+            <a asp-controller="Request" asp-action="Create" class="btn-primary-nav">
+                <i class="bi bi-plus-lg"></i>
+                <span>Yardım İste</span>
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-label="Menü">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu -->
+    <div class="nav-mobile" id="navMobile">
+        <a asp-controller="Home" asp-action="Index"><i class="bi bi-grid-1x2"></i> Talepler</a>
+        <a asp-controller="Home" asp-action="About"><i class="bi bi-info-circle"></i> Hakkında</a>
+        <a asp-controller="Request" asp-action="Create" class="mobile-cta"><i class="bi bi-plus-lg"></i> Yardım İste</a>
+    </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════
+     TOAST NOTIFICATIONS
+══════════════════════════════════════════════════════ -->
+@if (TempData["Success"] != null || TempData["Error"] != null || TempData["Info"] != null)
+{
+    <div class="toast-stack" id="toastStack">
+        @if (TempData["Success"] != null)
+        {
+            <div class="toast toast-success" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>@TempData["Success"]</span>
+                <button class="toast-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="toast toast-error" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>@TempData["Error"]</span>
+                <button class="toast-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+            </div>
+        }
+        @if (TempData["Info"] != null)
+        {
+            <div class="toast toast-info" role="alert">
+                <i class="bi bi-info-circle-fill"></i>
+                <span>@TempData["Info"]</span>
+                <button class="toast-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+            </div>
+        }
+    </div>
+}
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════════════ -->
+<main class="main-content">
+    @RenderBody()
+</main>
+
+<!-- ══════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════ -->
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <span class="brand-icon small"><i class="bi bi-hand-thumbs-up-fill"></i></span>
+            <span>İhtiyaç<strong>Molası</strong></span>
+        </div>
+        <p class="footer-tagline">Anlık Mahalle Yardım Ağı · Açık Kaynak</p>
+        <div class="footer-links">
+            <a asp-controller="Home" asp-action="About">Hakkında</a>
+            <a href="https://github.com/furkhangul" target="_blank"><i class="bi bi-github"></i> GitHub</a>
+        </div>
+        <p class="footer-copy" href="https://instagram.com/furoftheweak">© @DateTime.Now.Year · Furkan Gül · Yazılım Mühendisliği</p>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>
