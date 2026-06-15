@@ -321,4 +321,4 @@ MIT License — dilediğin gibi kullanabilir, fork edebilir, katkıda bulunabili
 
 ---
 
-**Furkan Gül** — Software Engeenering
+**Furkan Gül** — 2026
