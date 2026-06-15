@@ -27,6 +27,8 @@ Platform tamamen üyeliksiz çalışır. Kişisel veri toplanmaz, e-posta veya t
 
 ---
 <img width="1919" height="1021" alt="Ekran görüntüsü 2026-06-12 112416" src="https://github.com/user-attachments/assets/e7db4bb8-8d62-4fe6-b496-bedc769b27f2" />
+
+
 <img width="1589" height="887" alt="Ekran görüntüsü 2026-06-12 112426" src="https://github.com/user-attachments/assets/ec318b97-ae02-4fa3-b5eb-dfdd6c7b1c5c" />
 
 ## Özellikler
@@ -41,6 +43,8 @@ Platform tamamen üyeliksiz çalışır. Kişisel veri toplanmaz, e-posta veya t
 
 ---
 <img width="1919" height="1021" alt="Ekran görüntüsü 2026-06-12 112416" src="https://github.com/user-attachments/assets/93781e99-0dde-4ee2-b443-a366b530d85d" />
+
+<img width="1046" height="897" alt="Ekran görüntüsü 2026-06-12 112435" src="https://github.com/user-attachments/assets/c4fed66d-9393-4d8a-b57a-2bd052aad8ef" />
 
 ## Teknoloji Yığını
 
@@ -80,6 +84,13 @@ Kullanıcı (Tarayıcı)
 ```
 
 ---
+<img width="1919" height="1021" alt="Ekran görüntüsü 2026-06-12 112416" src="https://github.com/user-attachments/assets/e7db4bb8-8d62-4fe6-b496-bedc769b27f2" />
+
+
+<img width="1141" height="918" alt="Ekran görüntüsü 2026-06-12 112512" src="https://github.com/user-attachments/assets/07f14328-4cc7-45c5-8f63-8ec4f9156e82" />
+
+
+<img width="1141" height="904" alt="Ekran görüntüsü 2026-06-12 112506" src="https://github.com/user-attachments/assets/4e2e53e7-99b3-4d5f-8650-dbd11fc5a682" />
 
 ## Klasör Yapısı
 
